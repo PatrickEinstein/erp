@@ -20,6 +20,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const path = require("path");
 const logger = morgan("combined");
 
+
 dotenv.config();
 const app = express();
 
@@ -86,12 +87,14 @@ app.post("/create-pdf", async (req, res) => {
   console.log(data);
   const html = pdfTemplate(data);
 
-  fs.writeFileSync("index.html", html);
-  const html2 = fs.readFileSync("index.html", "utf8");
+fs.writeFileSync("index.html", html);
+ const html2 = fs.readFileSync("index.pdf", "utf8");
 
+ 
+  
   const options = { format: "Letter" };
 
-  pdf.create(html2, options).toFile("index.pdf", function (err, res) {
+ const pdfBuffer = pdf.create(html2, options).toFile("index.pdf", function (err, res) {
     return "Something broke";
   });
 
@@ -135,7 +138,7 @@ app.post("/create-pdf", async (req, res) => {
 
   await dataHandler();
 
-  pdfBuffer = fs.readFileSync("index.pdf");
+  // pdfBuffer =  fs.readFileSync("index.pdf");
 
   const { firstName, lastName, email, phone, companyName, Products } =
     data.user;
@@ -146,10 +149,10 @@ app.post("/create-pdf", async (req, res) => {
     });
   }
 
-  const userAlreadyExists = await User.findOne({ email });
-  if (userAlreadyExists) {
-    throw new BadRequestError("Email already in use");
-  }
+  // const userAlreadyExists = await User.findOne({ email });
+  // if (userAlreadyExists) {
+  //   throw new BadRequestError("Email already in use");
+  // }
 
   const user = await User.create({
     firstName,
@@ -158,9 +161,11 @@ app.post("/create-pdf", async (req, res) => {
     phone,
     companyName,
     Products,
+    pdf:pdfBuffer
   });
   console.log(user);
-  user.pdf = pdfBuffer;
+  // user.pdf = pdfBuffer;
+  console.log(pdfBuffer)
 
   await user.save();
 
